@@ -1,0 +1,821 @@
+[
+    {
+        "data": {
+            "text": "i feel awful about it too because it s my job to get him in a position to succeed and it just didn t happen here"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "im alone i feel awful"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "ive probably mentioned this before but i really do feel proud of myself for actually keeping up with my new years resolution of monthly and weekly goals"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i was feeling a little low few days back"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i beleive that i am much more sensitive to other peoples feelings and tend to be more compassionate"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "love"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i find myself frustrated with christians because i feel that there is constantly a talk about loving one another being there for each other and praying for each other and i have seen that this is not always the case"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "love"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i am one of those people who feels like going to the gym is only worthwhile if you can be there for an hour or more"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel especially pleased about this as this has been a long time coming"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i was struggling with these awful feelings and was saying such sweet things about not deserving my and my sisters friendship and we agreed well she was in her car just starting to drive away when she reached out her hand"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel so enraged but helpless at the same time"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "anger"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i said feeling a bit rebellious"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "anger"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i also feel disillusioned that someone who claimed to value the truth as i do was a fraud"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i mean is on this stupid trip of making the great album when things are going well i feel ecstatic"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i woke up feeling particularly vile tried to ignore it but it got worse and worse and worse"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "anger"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i could feel the vile moth burrowing its way into my brain seeking my brain as a means to control and enslave me just as those nasty bug things did to chekov in star trek the wrath of khan"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "anger"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i know its just doing its job and doesnt actually have thoughts or feelings but that little jingle it does at the end of every cycle just makes it seem so excited to have done another load that it cant help but sing about it"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i wish you knew every word i write i write for you and i think it s useless because i m just heartless this feeling is empty in it s w"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel weird knowing mine died when i wasn t around"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "fear"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel assured that there is no such thing as ultimate forgetting traces once impressed upon the memory are indestructible"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel blessed everyday for our little man and love to watch him grow"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "love"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel exhausted when i go home but i am always glad that i am learning new things and i can help others learn as well"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i stil can see kaibas face on every tv screen still see amateur duelists prowling the good side of city and still feel the urge to throttle all those idiotic mortals that dare to look me in the eye"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i don t like to feel uncomfortable with being alone and being quiet"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "fear"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i was left kinda feeling stupid and insecure"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i alternate between feeling sympathetic toward humanity and being a misanthrope"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "love"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i have a pretty bad feeling the last two books will be rushed in terms of story"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "anger"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i sincerely believe that every client celebrity or not deserves my full attention and leaves feeling more glamorous than when they arrived"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i don t feel comfortable around you"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i am happy that you don t feel as burdened and consumed as i do"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i am still here i am not dead yet but these things can not be said without feeling humiliated"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i have been continually surprised at how much less i need to eat to feel truly satisfied if im eating good food and sitting down for a whole lovely little experience at each meal satisfying the soul as well as the stomach"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i pretty much waddled out of the hospital feeling weird lightheaded but ok"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "surprise"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i apologize to him almost every day for my lack of faith and i ask him to give me more because i feel uncertain about my future here in kiev"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "fear"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i am still searching for direction but at least now i feel slightly more assured more hopeful"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i am so angry that i feel like i have to go through life not being as carefree as i want to be"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i feel passionate about today because of him"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "love"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i am only having day a week where i am feeling depressed or seriously anxious"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "sadness"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "article published"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "joy"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "data": {
+            "text": "i see things so clearly and with so much depth peace that it makes me feel unsure"
+        },
+        "annotations": [
+            {
+                "result": [
+                    {
+                        "value": {
+                            "choices": [
+                                "fear"
+                            ]
+                        },
+                        "from_name": "label",
+                        "to_name": "text",
+                        "type": "choices"
+                    }
+                ]
+            }
+        ]
+    }
+]

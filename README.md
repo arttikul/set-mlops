@@ -1,101 +1,105 @@
-## Локальний запуск Label Studio
+# Fedorenko | MLOps — ДЗ-1: Робота з даними
+
+Розмітка та версіонування датасету для задачі **класифікації емоцій у тексті**
+(6 класів: `sadness`, `joy`, `love`, `anger`, `fear`, `surprise`).
+
+## Інструмент розмітки
+
+**[Label Studio](https://labelstud.io/)**, тип проєкту — **Text Classification**
+(один клас на приклад), з кастомним labeling-конфігом `.dataset/labeling_config.xml`:
+
+```xml
+<View>
+  <Text name="text" value="$text"/>
+  <Choices name="label" toName="text" choice="single">
+    <Choice value="sadness"/>
+    <Choice value="joy"/>
+    <Choice value="love"/>
+    <Choice value="anger"/>
+    <Choice value="fear"/>
+    <Choice value="surprise"/>
+  </Choices>
+</View>
+```
+
+Джерело даних — публічний датасет емоцій (`.dataset/emotion-dataset.csv`, пари попереньо форматований у json `data_example.json`).
+
+На відміну від прикладу з зображеннями з лекції, тут не потрібне S3-сховище для
+самих вихідних даних — текст завдання лежить прямо в JSON-файлі імпорту, файлових
+посилань немає. SeaweedFS (S3-сумісне сховище) в `docker-compose.yml` піднімається
+лише як бекенд для **версіонування датасету через DVC** (див. нижче).
+
+## Як запустити розмітку
 
 ```bash
 docker compose up -d
 ```
 
-### Налаштування SeaweedFS
+Це піднімає Label Studio (з Postgres як БД) і SeaweedFS (потрібен лише для DVC-стореджа).
 
-SeaweedFS — це S3-сумісне об'єктне сховище. Воно надає кілька веб-інтерфейсів:
+- **Label Studio:** http://localhost:8080/
 
-- **Admin UI** (керування бакетами, S3-користувачами, ключами): http://localhost:23646/
-- **Filer UI** (файловий браузер по бакетах): http://localhost:8888/
-- **Master UI** (стан кластера, томи): http://localhost:9333/
+Кроки:
+1. Реєструємо акаунт, створюємо проєкт.
+2. Обираємо тип **Text Classification**, вставляємо labeling-конфіг з
+   `labeling_config.xml` (Settings → Labeling Interface → Code).
+3. Імпортуємо завдання: Import → завантажуємо попереднь форматовані файли
+   (кожне завдання вже містить текст і попередню анотацію).
+4. Переглядаємо/підтверджуємо розмітку в інтерфейсі проєкту.
+5. Експортуємо результат: Export → JSON. Файл кладемо в `dataset/`.
 
-**S3 API:** http://localhost:8333
-- **Access Key:** s3admin
-- **Secret Key:** s3secret-changeme
+## Як працює версіонування датасету
 
-> Облікові дані задано у файлі `docker/config/s3.json`.
+Версіонується вміст теки `dataset/` (експорт із Label Studio) через **DVC**,
+з віддаленим сховищем у SeaweedFS S3 (див. `.dvc/config`):
 
-Створіть три бакети:
-- `cars-dataset` — для зберігання вихідних даних (зображення)
-- `cars-labeled-dataset` — для зберігання розмічених даних від Label Studio
-- `cars-dvc-storage` — для зберігання версіонованих даних через DVC
-
-Найпростіше створити бакети через AWS CLI (SeaweedFS повністю S3-сумісний).
-
-Спочатку один раз додаємо окремий AWS-профіль `mlops-set-local` для локального сховища
-(потребує AWS CLI v2.13+, бо `endpoint_url` задається прямо в профілі):
-
-```bash
-aws configure set profile.mlops-set-local.region us-east-1
-aws configure set profile.mlops-set-local.endpoint_url http://localhost:8333
-aws configure set aws_access_key_id s3admin --profile mlops-set-local
-aws configure set aws_secret_access_key s3secret-changeme --profile mlops-set-local
+```
+[core]
+    remote = storage
+['remote "storage"']
+    url = s3://dvc-storage
+    endpointurl = http://localhost:8333
 ```
 
-Далі працюємо просто через `--profile mlops-set-local` (endpoint береться з профілю):
+Робочий цикл:
 
 ```bash
-# Створюємо бакети
-aws --profile mlops-set-local s3 mb s3://cars-dataset
-aws --profile mlops-set-local s3 mb s3://cars-labeled-dataset
-aws --profile mlops-set-local s3 mb s3://cars-dvc-storage
-
-# Перевіряємо список бакетів
-aws --profile mlops-set-local s3 ls
+# після нового експорту з Label Studio в dataset/
+dvc add dataset
+git add dataset.dvc
+git commit -m "Update dataset (vN)"
+git tag vN
+dvc push
 ```
 
-Створені бакети також видно у Filer UI (http://localhost:8888/buckets/) та в Admin UI.
+Наявні версії:
+- **v0** — порожній снепшот `dataset/` (до першого експорту, зафіксовано разом з
+  ініціалізацією DVC).
+- **v1** — перший реальний експорт з Label Studio: `project-1-...json`
+  (5116 розмічених прикладів).
 
-### Налаштування Label Studio
+Відновлення конкретної версії:
 
-**Label Studio:** http://localhost:8080/
+```bash
+git checkout v1
+dvc checkout
+```
 
-1. Реєструємо акаунт
-2. Створюємо проєкт
-   - Обираємо тип: Object Detection with Bounding Boxes
+Клонування репозиторію та отримання даних:
 
-3. Налаштовуємо проєкт
-   - Обираємо Cloud Storage
-   - Налаштовуємо Source Cloud Storage (бакет `cars-dataset`) та Target Cloud
-     Storage (бакет `cars-labeled-dataset`):
-     - Storage Type: AWS S3
-     - S3 Endpoint: http://seaweedfs:8333 (звертаємось до SeaweedFS за іменем
-       сервісу в Docker-мережі, а не localhost)
-     - Access Key ID: s3admin
-     - Secret Access Key: s3secret-changeme
-     - Опція "Treat every bucket object as a source file" - щоб кожен файл був завданням
-     - Вимикаємо pre-signed URLs - для проксювання зображень на фронт
+```bash
+git clone https://github.com/arttikul/set-mlops
+cd "Fedorenko | MLOps"
+dvc pull   # тягне дані з s3://dvc-storage (http://localhost:8333)
+```
 
-4. Завантажуємо зображення
-5. Виконуємо демо розмітки
-6. Показуємо приклад для розмітки питання-відповідь
+Лінія даних: `emotion-dataset.csv` (сирі дані з мітками) →
+`emotion_dataset_part_*.json` (завдання для імпорту) → Label Studio (розмітка/
+перевірка) → `dataset/` (експорт) → DVC (`v0`, `v1`, …) → SeaweedFS S3 (`s3://dvc-storage`).
 
-#### Локальне завантаження vs робота через S3
+## Для яких задач плануються ці дані
 
-Важливо розуміти різницю між двома способами додавання зображень — від цього
-залежить, який шлях до картинки опиниться в анотації.
-
-**Якщо завантажуємо картинку напряму в Label Studio** (Import / drag-and-drop):
-- файл зберігається **локально всередині Label Studio**, а не в S3;
-- LS додає випадковий префікс до імені (наприклад `9.png` → `056cc710-9.png`);
-- у завданні шлях локальний, і в анотації буде:
-  ```json
-  "data": { "image": "/data/upload/1/056cc710-9.png" },
-  "file_upload": 1
-  ```
-- картинка доступна за адресою `http://localhost:8080/data/upload/1/056cc710-9.png`
-  (а фізично — у томі Label Studio: `/label-studio/data/media/upload/...`);
-- у Target Storage експортується **тільки JSON-анотація**, саме зображення в S3
-  не потрапляє.
-
-**Якщо працюємо через Source Cloud Storage** (бакет `cars-dataset`):
-- зображення лишаються в S3, завдання лише посилається на оригінал;
-- імʼя файлу не змінюється, і в анотації одразу правильний S3-шлях:
-  ```json
-  "data": { "image": "s3://cars-dataset/6.png" },
-  "file_upload": null
-  ```
-- лінія даних «оригінал → анотація» цілісна — це і є правильний підхід для MLOps.
+Датасет буде використано для тренування моделі **класифікації емоцій у тексті**
+(6 класів вище) у наступних домашніх роботах курсу — тренування/трекінг
+експерименту, інференс (сервінг моделі) та моніторинг якості передбачень у
+проді.

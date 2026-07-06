@@ -1,0 +1,11 @@
+<View>
+  <Text name="text" value="$text"/>
+  <Choices name="label" toName="text" choice="single">
+    <Choice value="sadness"/>
+    <Choice value="joy"/>
+    <Choice value="love"/>
+    <Choice value="anger"/>
+    <Choice value="fear"/>
+    <Choice value="surprise"/>
+  </Choices>
+</View>

@@ -5,5 +5,5 @@
     endpointurl = http://localhost:8333
     access_key_id = s3admin
     secret_access_key = s3secret-changeme
-    
+    region = us-east-1
     
