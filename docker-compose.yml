@@ -1,0 +1,130 @@
+# Явна назва проєкту — щоб волюми/мережа звались mlops-week2_* і не плутались
+# з іншими стеками на машині.
+name: mlops-week2
+
+services:
+  # SeaweedFS — S3-сумісне об'єктне сховище.
+  #   S3 API:    :8333   (для Label Studio всередині мережі — http://seaweedfs:8333)
+  #   Filer UI:  :8888   (файловий браузер по бакетах)
+  #   Master UI: :9333   (стан кластера / томи)
+  # Один контейнер запускає master + volume + filer + s3 (режим `server`).
+  seaweedfs:
+    image: "chrislusf/seaweedfs:${SEAWEEDFS_VERSION:-4.30}"
+    restart: unless-stopped
+    ports:
+      - "8333:8333"      # S3-API
+      - "8888:8888"      # Web-UI (Filer / файловий браузер)
+      - "9333:9333"      # Web-UI (Master / кластер)
+    command: >
+      server -dir=/data -s3
+      -s3.config=/etc/seaweedfs/s3.json
+      -master.volumeSizeLimitMB=1024
+    volumes:
+      - ./.data/seaweedfs-data:/data
+      - ./config/s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9333/cluster/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Веб-адмінка SeaweedFS (керування бакетами, S3-користувачами, ключами).
+  #   Admin UI: :23646
+  seaweedfs-admin:
+    image: "chrislusf/seaweedfs:${SEAWEEDFS_VERSION:-4.30}"
+    restart: unless-stopped
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    ports:
+      - "23646:23646"    # Web-UI (Admin)
+    command: admin -port=23646 -masters=seaweedfs:9333
+
+  # Офіційний образ PostgreSQL (стандартний, перевірений).
+  postgres:
+    image: "postgres:${POSTGRES_VERSION:-17-alpine}"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB:       ${POSTGRES_DB:-postgres}
+    volumes:
+      - ./.data/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Label Studio — інструмент розмітки даних.
+  label-studio:
+    image: "heartexlabs/label-studio:${LABEL_STUDIO_VERSION:-1.23.0}"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+    ports:
+      - "8080:8000"
+    environment:
+      DJANGO_DB:        default
+      POSTGRE_NAME:     ${POSTGRES_DB:-postgres}
+      POSTGRE_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRE_PORT:     5432
+      POSTGRE_HOST:     postgres
+      LABEL_STUDIO_HOST: ${LABEL_STUDIO_HOST:-}
+      JSON_LOG: "1"
+      # Примусова path-style адресація S3 (інакше boto3 б'є у virtual-hosted style
+      # cars-dataset.seaweedfs:8333 і синхронізація падає). Див. config/aws-config.
+      AWS_CONFIG_FILE: /etc/aws/config
+      # S3-сховище для проєктів налаштовується в UI Label Studio:
+      #   S3 Endpoint:  http://seaweedfs:8333
+      #   Access Key:   s3admin            (див. config/s3.json)
+      #   Secret Key:   s3secret-changeme
+    volumes:
+      - ./.data/label-studio-data:/label-studio/data
+      - ./config/aws-config:/etc/aws/config:ro
+    command: label-studio-uwsgi
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # Oxen — git-подібна система версіювання великих датасетів для ML.
+  # Розгортаємо власний oxen-server (self-hosted) локально, без автентифікації
+  # (режим за замовчуванням — зручно для навчання).
+  #   Oxen API: :3010   (для клієнта — http://localhost:3010)
+  # Дані лежать у волюмі oxen-data (SYNC_DIR у контейнері — /var/oxen/data).
+  #
+  # Образ у публічному registry НЕ лежить (docker pull не працює) — Oxen
+  # роздає готовий образ як tar-артефакт у GitHub Releases. Тому ОДИН раз
+  # перед `docker compose up` завантажте tar і завантажте його в Docker
+  # (виберіть свою архітектуру: arm64 для Apple Silicon, amd64 для Intel):
+  #
+  #   wget https://github.com/Oxen-AI/Oxen/releases/latest/download/oxen-server-docker-arm64.tar
+  #   docker load < oxen-server-docker-arm64.tar
+  #
+  # Після `docker load` образ зветься oxen/oxen-server:latest.
+  #
+  # Усередині контейнера сервер слухає 3001 (захардкожено в образі). Хост-порт
+  # за замовчуванням 3010; якщо він зайнятий — підніміть з іншим, напр.:
+  #   OXEN_PORT=4010 docker compose up -d
+  # і тоді в командах клієнта вказуйте localhost:4010 замість localhost:3010.
+#  oxen-server:
+#    image: "oxen/oxen-server:latest"
+#    restart: unless-stopped
+#    ports:
+#      - "${OXEN_PORT:-3010}:3001"
+#    volumes:
+#      - oxen-data:/var/oxen/data
+
+volumes:
+  seaweedfs-data:
+  postgres-data:
+  label-studio-data:
+  oxen-data:

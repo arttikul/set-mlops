@@ -1,0 +1,6 @@
+# Примусова path-style адресація S3 — потрібно для SeaweedFS / MinIO та інших
+# S3-сумісних сховищ. За замовчуванням boto3 використовує virtual-hosted style
+# (cars-dataset.seaweedfs:8333), для якого немає DNS, і синхронізація падає.
+[default]
+s3 =
+    addressing_style = path
