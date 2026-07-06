@@ -6,3 +6,4 @@ lock
 config.local
 updater
 cache
+/tmp
