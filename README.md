@@ -1,4 +1,4 @@
-# Fedorenko | MLOps — ДЗ
+# Fedorenko | MLOps — ДЗ 01
 
 Розмітка та версіонування датасету для задачі **класифікації емоцій у тексті**
 (6 класів: `sadness`, `joy`, `love`, `anger`, `fear`, `surprise`).
