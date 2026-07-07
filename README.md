@@ -87,6 +87,8 @@ dvc push
   (5116 розмічених прикладів).
 - **v2** — повний CSV-експорт через `export_csv.sh`: `emotion-dataset-labeled.csv`
   (105116 розмічених прикладів).
+- **v3** — повторний CSV-експорт після продовження розмітки (155116 розмічених
+  прикладів).
 
 Відновлення конкретної версії:
 
@@ -155,8 +157,9 @@ python train.py --run-name wide-hidden --hidden-dim 256 --lr 5e-4 --max-features
 ### Де дивитися результати
 
 - **Проєкт W&B:** https://wandb.ai/arttikul-set-university/emotion-classification
-  — на момент написання тут 3 запуски (`baseline`, `wide-hidden`, `baseline-rerun`),
-  усі з val accuracy ≈ 0.97.
+  — на момент написання тут 4 запуски (`baseline`, `wide-hidden`, `baseline-rerun`
+  на v2 датасеті з val accuracy ≈ 0.97, та `v3-full-dataset` на оновленому v3
+  датасеті з val accuracy ≈ 0.95).
 - **Реєстр моделей:** W&B → Registry → Model → колекція `emotion-classifier`
   (entity `arttikul-set-university`) — версії артефакта, готові до завантаження
   через `run.use_artifact('wandb-registry-model/emotion-classifier:latest')`.
