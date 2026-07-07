@@ -5,3 +5,6 @@
 training/.venv
 training/wandb
 training/artifacts
+inference/.venv
+inference/model
+__pycache__

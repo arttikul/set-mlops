@@ -163,3 +163,47 @@ python train.py --run-name wide-hidden --hidden-dim 256 --lr 5e-4 --max-features
 - **Реєстр моделей:** W&B → Registry → Model → колекція `emotion-classifier`
   (entity `arttikul-set-university`) — версії артефакта, готові до завантаження
   через `run.use_artifact('wandb-registry-model/emotion-classifier:latest')`.
+
+## Інференс (ДЗ-3)
+
+**Сервінг:** FastAPI + Docker (за зразком `4-Inference/FastAPI_Docker` з лекції).
+Модель **не захардкоджена в репозиторії** — контейнер при старті сам тягне
+останню версію з W&B Registry (`inference/download_model.py`,
+`wandb-registry-model/emotion-classifier:latest`: `model.pt`, `vectorizer.pkl`,
+`labels.json`) і лише потім піднімає сервер.
+
+### Як підняти сервіс
+
+```bash
+cd "Fedorenko | MLOps/inference"
+cp .env.example .env   # впишіть свій WANDB_API_KEY
+
+docker build -t emotion-inference .
+docker run --rm --env-file .env -p 8081:8080 emotion-inference
+```
+
+(Порт хоста `8081` — щоб не конфліктувати з Label Studio, який займає `8080`.)
+
+### Як перевірити роботу
+
+```bash
+curl http://localhost:8081/ping
+# {"status":"ok"}
+
+curl -X POST http://localhost:8081/invocations \
+  -H 'Content-Type: application/json' \
+  -d '{"texts": ["i am so happy today, everything feels wonderful", "i am terrified of what might happen next"]}'
+```
+
+Відповідь — список передбачень (мітка + ймовірності по кожному з 6 класів) для
+кожного тексту з запиту, наприклад:
+
+```json
+[
+  {"text": "i am so happy today, everything feels wonderful", "label": "joy", "probabilities": {"joy": 1.0, "...": 0.0}},
+  {"text": "i am terrified of what might happen next", "label": "fear", "probabilities": {"fear": 0.9997, "...": 0.0}}
+]
+```
+
+Без Docker (локально, для розробки): `pip install -r requirements.txt`,
+`python download_model.py`, потім `uvicorn main:app --host 0.0.0.0 --port 8081`.
