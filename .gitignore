@@ -2,3 +2,6 @@
 .dataset
 /dataset
 .env
+training/.venv
+training/wandb
+training/artifacts

@@ -85,6 +85,8 @@ dvc push
   ініціалізацією DVC).
 - **v1** — перший реальний експорт з Label Studio: `project-1-...json`
   (5116 розмічених прикладів).
+- **v2** — повний CSV-експорт через `export_csv.sh`: `emotion-dataset-labeled.csv`
+  (105116 розмічених прикладів).
 
 Відновлення конкретної версії:
 
@@ -111,3 +113,50 @@ dvc pull   # тягне дані з s3://dvc-storage (http://localhost:8333)
 (6 класів вище) у наступних домашніх роботах курсу — тренування/трекінг
 експерименту, інференс (сервінг моделі) та моніторинг якості передбачень у
 проді.
+
+## Тренування моделі та трекінг експериментів (ДЗ-2)
+
+**Модель:** TF-IDF (`scikit-learn`) + простий PyTorch MLP-класифікатор
+(`Linear → ReLU → Dropout → Linear`) на 6 класів емоцій, натренований на
+`dataset/emotion-dataset-labeled.csv` (v2, 105116 прикладів; 90/10
+стратифікований train/val split). Це найпростіший локальний варіант з лекції
+(за зразком `3-Model-Training-Tracking/lr/train.py`) — окремий Ray/K8s-кластер
+не піднімався, він не потрібен для цього обсягу даних.
+
+**Трекінг:** [Weights & Biases](https://wandb.ai/) — щоб зберегти наступність із
+ДЗ-3 (`4-Inference/FastAPI_Docker/download_model.py` тягне модель саме з W&B
+Model Registry).
+
+### Як запустити тренування
+
+```bash
+cd "Fedorenko | MLOps/training"
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env   # впишіть свій WANDB_API_KEY (https://wandb.ai/authorize) і WANDB_ENTITY
+
+python train.py --run-name baseline
+# інший порівнюваний запуск (інші гіперпараметри):
+python train.py --run-name wide-hidden --hidden-dim 256 --lr 5e-4 --max-features 30000
+```
+
+Гіперпараметри (`--epochs`, `--lr`, `--hidden-dim`, `--max-features`, `--batch-size`,
+`--dropout`) задаються прапорцями — кожен запуск логується окремим ран у W&B, тож
+запуски з різними значеннями одразу можна порівняти.
+
+`train.py` логує в W&B (`wandb.init`, `wandb.log` по кожній епосі, `wandb.watch`)
+`train/val loss` і `accuracy`, а наприкінці — таблицю per-class precision/recall/F1
+на валідації. Модель (`model.pt`), TF-IDF-векторайзер (`vectorizer.pkl`) і мапу
+класів (`labels.json`) зберігає як `wandb.Artifact` і одразу лінкує нову версію в
+**W&B Registry** (`wandb-registry-model/emotion-classifier` — новий формат
+реєстру моделей, що прийшов на зміну старому `<entity>/model-registry/<name>`).
+
+### Де дивитися результати
+
+- **Проєкт W&B:** https://wandb.ai/arttikul-set-university/emotion-classification
+  — на момент написання тут 3 запуски (`baseline`, `wide-hidden`, `baseline-rerun`),
+  усі з val accuracy ≈ 0.97.
+- **Реєстр моделей:** W&B → Registry → Model → колекція `emotion-classifier`
+  (entity `arttikul-set-university`) — версії артефакта, готові до завантаження
+  через `run.use_artifact('wandb-registry-model/emotion-classifier:latest')`.
