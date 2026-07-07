@@ -1,4 +1,5 @@
 import json
+import time
 from pathlib import Path
 from typing import List
 
@@ -6,11 +7,23 @@ import joblib
 import torch
 import torch.nn as nn
 from fastapi import FastAPI
+from prometheus_client import Counter, Histogram, make_asgi_app
 from pydantic import BaseModel
 
 MODEL_DIR = Path(__file__).resolve().parent / "model"
 
 app = FastAPI()
+
+# Метрики для Prometheus/Grafana (ДЗ-4): кількість передбачень за хвилину
+# рахуємо як rate(emotion_predictions_total[1m])*60, середню latency -- як
+# emotion_prediction_latency_seconds_sum / emotion_prediction_latency_seconds_count.
+PREDICTIONS_TOTAL = Counter(
+    "emotion_predictions_total", "Total number of texts classified", ["label"]
+)
+PREDICTION_LATENCY = Histogram(
+    "emotion_prediction_latency_seconds", "Time spent processing an /invocations request"
+)
+app.mount("/metrics", make_asgi_app())
 
 
 # Та сама архітектура, що й у training/train.py -- ваги завантажуються з
@@ -51,22 +64,30 @@ class TextsInput(BaseModel):
 
 @app.post("/invocations")
 def predict(payload: TextsInput):
+    start = time.perf_counter()
+
     features = vectorizer.transform(payload.texts).toarray()
     input_tensor = torch.tensor(features, dtype=torch.float32)
 
     with torch.no_grad():
         probs = torch.softmax(model(input_tensor), dim=1)
 
+    labels = [classes[i] for i in probs.argmax(dim=1).tolist()]
+
     print("Input texts:", payload.texts)
-    print("Predicted labels:", [classes[i] for i in probs.argmax(dim=1).tolist()])
+    print("Predicted labels:", labels)
+
+    PREDICTION_LATENCY.observe(time.perf_counter() - start)
+    for label in labels:
+        PREDICTIONS_TOTAL.labels(label=label).inc()
 
     return [
         {
             "text": text,
-            "label": classes[row.argmax().item()],
+            "label": label,
             "probabilities": {cls: round(p, 4) for cls, p in zip(classes, row.tolist())},
         }
-        for text, row in zip(payload.texts, probs)
+        for text, label, row in zip(payload.texts, labels, probs)
     ]
 
 

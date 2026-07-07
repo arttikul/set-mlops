@@ -5,3 +5,4 @@ wandb
 torch
 scikit-learn
 joblib
+prometheus-client

@@ -207,3 +207,46 @@ curl -X POST http://localhost:8081/invocations \
 
 Без Docker (локально, для розробки): `pip install -r requirements.txt`,
 `python download_model.py`, потім `uvicorn main:app --host 0.0.0.0 --port 8081`.
+
+## Моніторинг (ДЗ-4)
+
+**Метрики + дашборд:** Prometheus + Grafana (`prometheus-client` у самому
+FastAPI-сервісі). `inference/main.py` рахує:
+- `emotion_predictions_total{label=...}` — лічильник передбачень по кожному
+  класу (→ **передбачень за хвилину**: `sum(rate(emotion_predictions_total[1m])) * 60`).
+- `emotion_prediction_latency_seconds` — гістограма часу обробки `/invocations`
+  (→ **середня latency**: `emotion_prediction_latency_seconds_sum / emotion_prediction_latency_seconds_count`).
+
+Метрики віддаються на `/metrics` (стандартний Prometheus text format).
+
+### Як підняти моніторинг
+
+```bash
+cd "Fedorenko | MLOps/monitoring"
+docker compose up --build -d
+```
+
+Піднімає три контейнери в одній мережі: сам inference-сервіс (збирається з
+`../inference`, тягне модель з W&B Registry так само, як у ДЗ-3), Prometheus
+(скрейпить `inference:8080/metrics` кожні 5с, конфіг — `prometheus/prometheus.yml`)
+і Grafana (датасорс і дашборд `Emotion Inference` запровіжинені автоматично з
+`grafana/provisioning/`).
+
+Сервіси:
+- **Inference API:** http://localhost:8082 (`/invocations`, `/ping`, `/metrics`)
+- **Prometheus:** http://localhost:9090
+- **Grafana:** http://localhost:3000 (`admin` / `admin`) → дашборд **Emotion Inference**
+  (панелі: Predictions per minute, Average latency (ms), Predictions by label)
+
+### Як згенерувати навантаження для дашборду
+
+```bash
+for i in $(seq 1 40); do
+  curl -s -X POST http://localhost:8082/invocations \
+    -H 'Content-Type: application/json' \
+    -d '{"texts": ["i am so happy today", "i am terrified", "i feel so sad"]}' > /dev/null
+  sleep 0.5
+done
+```
+
+Бонус (виявлення дріфту через Evidently) поки не реалізовано.
