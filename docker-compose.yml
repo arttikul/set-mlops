@@ -123,8 +123,60 @@ services:
 #    volumes:
 #      - oxen-data:/var/oxen/data
 
+  # Інференс-сервіс класифікації емоцій (FastAPI).
+  # Модель у образі не захардкоджена — контейнер при старті сам тягне
+  # останню версію з W&B Registry (потрібен inference/.env з WANDB_API_KEY,
+  # див. inference/.env.example). env_file необов'язковий (required: false),
+  # щоб відсутність inference/.env не блокувала підняття решти стеку —
+  # без нього просто впаде тільки контейнер inference.
+  inference:
+    build:
+      context: ./inference
+      dockerfile: Dockerfile
+    container_name: emotion-inference
+    restart: unless-stopped
+    env_file:
+      - path: ./inference/.env
+        required: false
+    ports:
+      - "8082:8080"      # /invocations, /ping, /metrics
+
+  # Prometheus — скрейпить /metrics інференс-сервісу.
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: emotion-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    depends_on:
+      - inference
+
+  # Grafana — дашборд "Emotion Inference" (датасорс і дашборд запровіжинені
+  # автоматично з monitoring/grafana/provisioning/).
+  grafana:
+    image: grafana/grafana:latest
+    container_name: emotion-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
 volumes:
   seaweedfs-data:
   postgres-data:
   label-studio-data:
   oxen-data:
+  prometheus-data:
+  grafana-data:

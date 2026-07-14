@@ -1,4 +1,4 @@
-# Fedorenko | MLOps — ДЗ 01
+# Fedorenko | MLOps
 
 Розмітка та версіонування датасету для задачі **класифікації емоцій у тексті**
 (6 класів: `sadness`, `joy`, `love`, `anger`, `fear`, `surprise`).
@@ -29,13 +29,43 @@
 посилань немає. SeaweedFS (S3-сумісне сховище) в `docker-compose.yml` піднімається
 лише як бекенд для **версіонування датасету через DVC** (див. нижче).
 
-## Як запустити розмітку
+## Як підняти весь стек
+
+Один `docker-compose.yml` у корені проєкту піднімає весь стек — розмітку,
+інференс і моніторинг одним викликом:
 
 ```bash
-docker compose up -d
+cd "Fedorenko | MLOps"
+docker compose up -d --build
 ```
 
-Це піднімає Label Studio (з Postgres як БД) і SeaweedFS (потрібен лише для DVC-стореджа).
+(`--build` потрібен один раз / після змін у `inference/` — збирає образ
+inference-сервісу; SeaweedFS, Postgres, Label Studio, Prometheus і Grafana
+завжди тягнуться готовими образами.)
+
+Сервіси та порти:
+
+| Сервіс | URL | Навіщо |
+|---|---|---|
+| Label Studio | http://localhost:8080 | розмітка датасету |
+| SeaweedFS S3 API | http://localhost:8333 | DVC-сховище датасету |
+| SeaweedFS Filer UI | http://localhost:8888 | файловий браузер по бакетах |
+| SeaweedFS Master UI | http://localhost:9333 | стан кластера/томів |
+| SeaweedFS Admin UI | http://localhost:23646 | бакети/користувачі/ключі |
+| Inference API | http://localhost:8082 | `/invocations`, `/ping`, `/metrics` |
+| Prometheus | http://localhost:9090 | метрики inference-сервісу |
+| Grafana | http://localhost:3000 | дашборд `Emotion Inference` (`admin`/`admin`) |
+
+Inference-контейнер при старті тягне модель з W&B Registry — потрібен
+`inference/.env` з `WANDB_API_KEY` (`cp inference/.env.example inference/.env`
+і впишіть свій ключ, див. розділ [Інференс](#інференс) нижче). Без нього
+решта стеку (розмітка, SeaweedFS/DVC) піднімається і працює нормально — впаде
+тільки контейнер `inference` (`env_file` для нього необов'язковий).
+
+Щоб зупинити стек: `docker compose down` (дані у волюмах зберігаються;
+`docker compose down -v` — знести і їх).
+
+## Розмітка датасету
 
 - **Label Studio:** http://localhost:8080/
 
@@ -109,14 +139,13 @@ dvc pull   # тягне дані з s3://dvc-storage (http://localhost:8333)
 `emotion_dataset_part_*.json` (завдання для імпорту) → Label Studio (розмітка/
 перевірка) → `dataset/` (експорт) → DVC (`v0`, `v1`, …) → SeaweedFS S3 (`s3://dvc-storage`).
 
-## Для яких задач плануються ці дані
+## Для яких задач використовуються ці дані
 
-Датасет буде використано для тренування моделі **класифікації емоцій у тексті**
-(6 класів вище) у наступних домашніх роботах курсу — тренування/трекінг
-експерименту, інференс (сервінг моделі) та моніторинг якості передбачень у
-проді.
+Датасет використано для тренування моделі **класифікації емоцій у тексті**
+(6 класів вище) — тренування/трекінг експерименту, інференс (сервінг моделі)
+та моніторинг якості передбачень у проді, як описано нижче.
 
-## Тренування моделі та трекінг експериментів (ДЗ-2)
+## Тренування моделі та трекінг експериментів
 
 **Модель:** TF-IDF (`scikit-learn`) + простий PyTorch MLP-класифікатор
 (`Linear → ReLU → Dropout → Linear`) на 6 класів емоцій, натренований на
@@ -125,8 +154,8 @@ dvc pull   # тягне дані з s3://dvc-storage (http://localhost:8333)
 (за зразком `3-Model-Training-Tracking/lr/train.py`) — окремий Ray/K8s-кластер
 не піднімався, він не потрібен для цього обсягу даних.
 
-**Трекінг:** [Weights & Biases](https://wandb.ai/) — щоб зберегти наступність із
-ДЗ-3 (`4-Inference/FastAPI_Docker/download_model.py` тягне модель саме з W&B
+**Трекінг:** [Weights & Biases](https://wandb.ai/) — щоб зберегти наступність з
+інференс-сервісом (`inference/download_model.py` тягне модель саме з W&B
 Model Registry).
 
 ### Як запустити тренування
@@ -164,7 +193,7 @@ python train.py --run-name wide-hidden --hidden-dim 256 --lr 5e-4 --max-features
   (entity `arttikul-set-university`) — версії артефакта, готові до завантаження
   через `run.use_artifact('wandb-registry-model/emotion-classifier:latest')`.
 
-## Інференс (ДЗ-3)
+## Інференс
 
 **Сервінг:** FastAPI + Docker (за зразком `4-Inference/FastAPI_Docker` з лекції).
 Модель **не захардкоджена в репозиторії** — контейнер при старті сам тягне
@@ -174,23 +203,36 @@ python train.py --run-name wide-hidden --hidden-dim 256 --lr 5e-4 --max-features
 
 ### Як підняти сервіс
 
+Сервіс `inference` — частина спільного `docker-compose.yml` у корені проєкту
+(див. [Як підняти весь стек](#як-підняти-весь-стек)):
+
+```bash
+cd "Fedorenko | MLOps"
+cp inference/.env.example inference/.env   # впишіть свій WANDB_API_KEY
+docker compose up -d --build inference
+```
+
+- **Inference API:** http://localhost:8082 (`/invocations`, `/ping`, `/metrics`)
+
+Для ізольованого тесту (без решти стеку) можна й по-старому зібрати та
+запустити самим Docker, без compose:
+
 ```bash
 cd "Fedorenko | MLOps/inference"
-cp .env.example .env   # впишіть свій WANDB_API_KEY
-
 docker build -t emotion-inference .
 docker run --rm --env-file .env -p 8081:8080 emotion-inference
 ```
 
-(Порт хоста `8081` — щоб не конфліктувати з Label Studio, який займає `8080`.)
+(Тут порт хоста `8081`, щоб не перетнутись з `inference` у compose-стеку —
+якщо він теж піднятий на `8082`.)
 
 ### Як перевірити роботу
 
 ```bash
-curl http://localhost:8081/ping
+curl http://localhost:8082/ping
 # {"status":"ok"}
 
-curl -X POST http://localhost:8081/invocations \
+curl -X POST http://localhost:8082/invocations \
   -H 'Content-Type: application/json' \
   -d '{"texts": ["i am so happy today, everything feels wonderful", "i am terrified of what might happen next"]}'
 ```
@@ -208,7 +250,7 @@ curl -X POST http://localhost:8081/invocations \
 Без Docker (локально, для розробки): `pip install -r requirements.txt`,
 `python download_model.py`, потім `uvicorn main:app --host 0.0.0.0 --port 8081`.
 
-## Моніторинг (ДЗ-4)
+## Моніторинг
 
 **Метрики + дашборд:** Prometheus + Grafana (`prometheus-client` у самому
 FastAPI-сервісі). `inference/main.py` рахує:
@@ -221,16 +263,20 @@ FastAPI-сервісі). `inference/main.py` рахує:
 
 ### Як підняти моніторинг
 
+Prometheus і Grafana — теж частина спільного `docker-compose.yml` у корені
+проєкту, піднімаються разом з усім стеком (див.
+[Як підняти весь стек](#як-підняти-весь-стек)):
+
 ```bash
-cd "Fedorenko | MLOps/monitoring"
-docker compose up --build -d
+cd "Fedorenko | MLOps"
+docker compose up -d --build
 ```
 
-Піднімає три контейнери в одній мережі: сам inference-сервіс (збирається з
-`../inference`, тягне модель з W&B Registry так само, як у ДЗ-3), Prometheus
-(скрейпить `inference:8080/metrics` кожні 5с, конфіг — `prometheus/prometheus.yml`)
-і Grafana (датасорс і дашборд `Emotion Inference` запровіжинені автоматично з
-`grafana/provisioning/`).
+Це піднімає inference-сервіс (образ збирається з `inference/`, тягне модель з
+W&B Registry так само, як описано вище), Prometheus (скрейпить `inference:8080/metrics`
+кожні 5с, конфіг — `monitoring/prometheus/prometheus.yml`) і Grafana (датасорс і
+дашборд `Emotion Inference` запровіжинені автоматично з
+`monitoring/grafana/provisioning/`).
 
 Сервіси:
 - **Inference API:** http://localhost:8082 (`/invocations`, `/ping`, `/metrics`)

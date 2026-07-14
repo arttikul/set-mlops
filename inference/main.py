@@ -14,7 +14,7 @@ MODEL_DIR = Path(__file__).resolve().parent / "model"
 
 app = FastAPI()
 
-# Метрики для Prometheus/Grafana (ДЗ-4): кількість передбачень за хвилину
+# Метрики для Prometheus/Grafana: кількість передбачень за хвилину
 # рахуємо як rate(emotion_predictions_total[1m])*60, середню latency -- як
 # emotion_prediction_latency_seconds_sum / emotion_prediction_latency_seconds_count.
 PREDICTIONS_TOTAL = Counter(
