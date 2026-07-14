@@ -296,3 +296,15 @@ done
 ```
 
 Бонус (виявлення дріфту через Evidently) поки не реалізовано.
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`), запускається на кожен push і
+pull request у `main`:
+- **`validate-compose`** — `docker compose config -q` перевіряє, що кореневий
+  `docker-compose.yml` валідний (правильні шляхи, інтерполяція змінних) без
+  завантаження жодного образу.
+- **`build-inference`** — `docker build ./inference` перевіряє, що
+  `Dockerfile` і `requirements.txt` inference-сервісу все ще збираються в
+  образ (без завантаження моделі — та тягнеться пізніше, при старті
+  контейнера, і потребує `WANDB_API_KEY`).
